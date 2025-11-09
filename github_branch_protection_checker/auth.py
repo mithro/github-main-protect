@@ -27,7 +27,8 @@ def get_github_token() -> str:
         return token
 
     except subprocess.CalledProcessError as e:
+        stderr_msg = getattr(e, 'stderr', 'No additional details available')
         raise RuntimeError(
             f"Error: GitHub CLI not authenticated. Run 'gh auth login' first.\n"
-            f"Details: {e.stderr}"
-        )
+            f"Details: {stderr_msg}"
+        ) from e

@@ -1,0 +1,24 @@
+[project]
+name = "github-branch-protection-checker"
+version = "0.1.0"
+description = "Find GitHub repositories lacking branch protection"
+requires-python = ">=3.8"
+dependencies = [
+    "requests>=2.31.0",
+]
+
+[project.scripts]
+check-branch-protection = "github_branch_protection_checker:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.4.0",
+]

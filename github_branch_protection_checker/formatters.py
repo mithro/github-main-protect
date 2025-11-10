@@ -40,12 +40,14 @@ def format_console_output(
 
         for repo in unprotected_repos:
             full_name = f"{repo.owner}/{repo.name}"
+            full_name_display = f"{full_name[:32]}..." if len(full_name) > 35 else f"{full_name:<35}"
             branch = repo.default_branch or "N/A"
+            branch_display = f"{branch[:9]}..." if len(branch) > 12 else f"{branch:<12}"
             private = "Yes" if repo.is_private else "No"
             fork = "Yes" if repo.is_fork else "No"
 
             lines.append(
-                f"│ {full_name:<35} │ {branch:<12} │ {private:<7} │ {fork:<4} │"
+                f"│ {full_name_display} │ {branch_display} │ {private:<7} │ {fork:<4} │"
             )
 
         lines.append("└─────────────────────────────────────┴──────────────┴─────────┴──────┘")
@@ -73,7 +75,7 @@ def export_to_json(
     Returns:
         Path to created file
     """
-    timestamp = datetime.now().strftime("%Y-%m-%d-%H%M%S")
+    timestamp = datetime.now().strftime("%Y-%m-%d-%H%M%S-%f")
     filename = f"unprotected-repos-{timestamp}.json"
     filepath = Path(output_dir) / filename
 
@@ -104,7 +106,7 @@ def export_to_csv(unprotected_repos: List[Repository], output_dir: str = ".") ->
     Returns:
         Path to created file
     """
-    timestamp = datetime.now().strftime("%Y-%m-%d-%H%M%S")
+    timestamp = datetime.now().strftime("%Y-%m-%d-%H%M%S-%f")
     filename = f"unprotected-repos-{timestamp}.csv"
     filepath = Path(output_dir) / filename
 
@@ -139,7 +141,7 @@ def export_to_markdown(
     Returns:
         Path to created file
     """
-    timestamp = datetime.now().strftime("%Y-%m-%d-%H%M%S")
+    timestamp = datetime.now().strftime("%Y-%m-%d-%H%M%S-%f")
     filename = f"unprotected-repos-{timestamp}.md"
     filepath = Path(output_dir) / filename
 

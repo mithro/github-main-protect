@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(superpowers:brainstorming)",
+      "WebFetch(domain:docs.github.com)",
+      "WebSearch",
+      "Bash(gh api graphql:*)",
+      "Skill(superpowers:using-git-worktrees)",
+      "Skill(superpowers:writing-plans)",
+      "Skill(superpowers:subagent-driven-development)",
+      "Bash(git log:*)",
+      "Bash(test:*)",
+      "Bash(git show:*)",
+      "Skill(superpowers:finishing-a-development-branch)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

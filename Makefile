@@ -9,8 +9,14 @@ help: ## Show this help message
 install: ## Install dependencies using uv
 	uv sync
 
-test: ## Run all tests with pytest
+test: ## Run fast tests only (skips slow integration tests)
 	uv run pytest -v
+
+test-all: ## Run all tests including slow integration tests
+	uv run pytest -v -m ""
+
+test-slow: ## Run only slow integration tests
+	uv run pytest -v -m slow
 
 test-coverage: ## Run tests with coverage report
 	uv run pytest --cov=github_branch_protection_checker --cov-report=html --cov-report=term

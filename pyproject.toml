@@ -22,7 +22,7 @@ markers = [
 ]
 addopts = "-m 'not slow'"  # Skip slow tests by default
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "pytest>=7.4.0",
 ]

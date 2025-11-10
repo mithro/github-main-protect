@@ -115,13 +115,18 @@ def test_fetch_repositories_multiple_pages():
     assert second_call[1]['variables']['cursor'] == 'cursor1'
 
 
-def test_repo_query_structure():
-    """Test that REPO_QUERY has required fields"""
-    assert 'ownerAffiliations: OWNER' in REPO_QUERY
+def test_repo_query_contains_required_fields():
+    """Test that REPO_QUERY contains all required fields for protection detection"""
+    # Protection detection fields
     assert 'branchProtectionRule' in REPO_QUERY
     assert 'refUpdateRule' in REPO_QUERY
     assert 'rules(first: 1)' in REPO_QUERY
     assert 'totalCount' in REPO_QUERY
+
+    # Pagination fields
     assert 'pageInfo' in REPO_QUERY
     assert 'hasNextPage' in REPO_QUERY
     assert 'endCursor' in REPO_QUERY
+
+    # Filtering
+    assert 'ownerAffiliations: OWNER' in REPO_QUERY

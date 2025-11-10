@@ -31,7 +31,7 @@ jobs:
         run: uv sync --dev
 
       - name: Install ruff
-        run: uv pip install ruff
+        run: uv pip install --system ruff
 
       - name: Run ruff linting
         run: uv run ruff check github_branch_protection_checker/ tests/
@@ -125,7 +125,7 @@ jobs:
         run: uv sync --dev
 
       - name: Install pytest-cov
-        run: uv pip install pytest-cov
+        run: uv pip install --system pytest-cov
 
       - name: Run tests with coverage
         run: uv run pytest --cov=github_branch_protection_checker --cov-report=xml --cov-report=term
@@ -158,7 +158,7 @@ jobs:
 
       - name: Test installation from wheel
         run: |
-          uv pip install dist/*.whl
+          uv pip install --system dist/*.whl
           uv run python -c "import github_branch_protection_checker; print('Package installed and imported successfully')"
 
   type-check:
@@ -183,7 +183,7 @@ jobs:
         run: uv sync --dev
 
       - name: Install mypy
-        run: uv pip install mypy types-requests
+        run: uv pip install --system mypy types-requests
 
       - name: Run mypy type checking
         run: uv run mypy github_branch_protection_checker/ --ignore-missing-imports
@@ -196,7 +196,7 @@ jobs:
 
       - name: Check for merge conflicts
         run: |
-          if grep -r "<<<<<<< HEAD" . --exclude-dir=.git; then
+          if grep -r "<<<<<<< HEAD" . --exclude-dir=.git --exclude-dir=.github; then
             echo "Error: Merge conflict markers found"
             exit 1
           fi

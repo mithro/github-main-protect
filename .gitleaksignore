@@ -1,0 +1,5 @@
+# Ignore false positives
+# Format: <file>:<rule>:<line>
+
+# False positive: Documentation example, not a real secret
+README.md:sidekiq-secret:50

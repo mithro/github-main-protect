@@ -1,17 +1,16 @@
 """Output formatters for repository data"""
-import json
+
 import csv
+import json
 from datetime import datetime
 from pathlib import Path
 from typing import List
+
 from .models import Repository
 
 
 def format_console_output(
-    unprotected_repos: List[Repository],
-    total_repos: int,
-    archived_count: int,
-    no_branch_count: int
+    unprotected_repos: List[Repository], total_repos: int, archived_count: int, no_branch_count: int
 ) -> str:
     """
     Format repositories for console output.
@@ -40,15 +39,15 @@ def format_console_output(
 
         for repo in unprotected_repos:
             full_name = f"{repo.owner}/{repo.name}"
-            full_name_display = f"{full_name[:32]}..." if len(full_name) > 35 else f"{full_name:<35}"
+            full_name_display = (
+                f"{full_name[:32]}..." if len(full_name) > 35 else f"{full_name:<35}"
+            )
             branch = repo.default_branch or "N/A"
             branch_display = f"{branch[:9]}..." if len(branch) > 12 else f"{branch:<12}"
             private = "Yes" if repo.is_private else "No"
             fork = "Yes" if repo.is_fork else "No"
 
-            lines.append(
-                f"│ {full_name_display} │ {branch_display} │ {private:<7} │ {fork:<4} │"
-            )
+            lines.append(f"│ {full_name_display} │ {branch_display} │ {private:<7} │ {fork:<4} │")
 
         lines.append("└─────────────────────────────────────┴──────────────┴─────────┴──────┘")
 
@@ -60,7 +59,7 @@ def export_to_json(
     total_repos: int,
     archived_count: int,
     no_branch_count: int,
-    output_dir: str = "."
+    output_dir: str = ".",
 ) -> str:
     """
     Export repositories to JSON file.
@@ -80,16 +79,16 @@ def export_to_json(
     filepath = Path(output_dir) / filename
 
     data = {
-        'summary': {
-            'total_repositories': total_repos,
-            'archived_skipped': archived_count,
-            'no_branch_skipped': no_branch_count,
-            'unprotected_count': len(unprotected_repos)
+        "summary": {
+            "total_repositories": total_repos,
+            "archived_skipped": archived_count,
+            "no_branch_skipped": no_branch_count,
+            "unprotected_count": len(unprotected_repos),
         },
-        'unprotected_repositories': [repo.to_dict() for repo in unprotected_repos]
+        "unprotected_repositories": [repo.to_dict() for repo in unprotected_repos],
     }
 
-    with open(filepath, 'w') as f:
+    with filepath.open("w") as f:
         json.dump(data, f, indent=2)
 
     return str(filepath)
@@ -110,8 +109,8 @@ def export_to_csv(unprotected_repos: List[Repository], output_dir: str = ".") ->
     filename = f"unprotected-repos-{timestamp}.csv"
     filepath = Path(output_dir) / filename
 
-    with open(filepath, 'w', newline='') as f:
-        fieldnames = ['name', 'owner', 'url', 'default_branch', 'is_private', 'is_fork']
+    with filepath.open("w", newline="") as f:
+        fieldnames = ["name", "owner", "url", "default_branch", "is_private", "is_fork"]
         writer = csv.DictWriter(f, fieldnames=fieldnames)
 
         writer.writeheader()
@@ -126,7 +125,7 @@ def export_to_markdown(
     total_repos: int,
     archived_count: int,
     no_branch_count: int,
-    output_dir: str = "."
+    output_dir: str = ".",
 ) -> str:
     """
     Export repositories to Markdown file.
@@ -166,11 +165,10 @@ def export_to_markdown(
             fork = "Yes" if repo.is_fork else "No"
 
             lines.append(
-                f"| {full_name} | {branch} | {private} | {fork} | "
-                f"[{full_name}]({repo.url}) |"
+                f"| {full_name} | {branch} | {private} | {fork} | [{full_name}]({repo.url}) |"
             )
 
-    with open(filepath, 'w') as f:
+    with filepath.open("w") as f:
         f.write("\n".join(lines))
 
     return str(filepath)

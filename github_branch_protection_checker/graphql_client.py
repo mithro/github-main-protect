@@ -1,6 +1,8 @@
 """GraphQL client for GitHub API"""
+
+from typing import Any, Dict, Optional
+
 import requests
-from typing import Dict, Any, Optional
 
 
 class GraphQLClient:
@@ -16,10 +18,7 @@ class GraphQLClient:
             token: GitHub OAuth token
         """
         self.token = token
-        self.headers = {
-            'Authorization': f'Bearer {token}',
-            'Content-Type': 'application/json'
-        }
+        self.headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 
     def execute(self, query: str, variables: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
@@ -35,16 +34,13 @@ class GraphQLClient:
         Raises:
             RuntimeError: On HTTP errors, GraphQL errors, or network failures
         """
-        payload = {'query': query}
+        payload: Dict[str, Any] = {"query": query}
         if variables:
-            payload['variables'] = variables
+            payload["variables"] = variables
 
         try:
             response = requests.post(
-                self.GITHUB_GRAPHQL_URL,
-                json=payload,
-                headers=self.headers,
-                timeout=30
+                self.GITHUB_GRAPHQL_URL, json=payload, headers=self.headers, timeout=30
             )
 
             if response.status_code != 200:
@@ -55,13 +51,11 @@ class GraphQLClient:
 
             result = response.json()
 
-            if 'errors' in result:
-                error_messages = [err['message'] for err in result['errors']]
-                raise RuntimeError(
-                    f"Error: GitHub API returned GraphQL error: {error_messages[0]}"
-                )
+            if "errors" in result:
+                error_messages = [err["message"] for err in result["errors"]]
+                raise RuntimeError(f"Error: GitHub API returned GraphQL error: {error_messages[0]}")
 
-            return result['data']
+            return result["data"]
 
         except requests.ConnectionError as e:
-            raise RuntimeError(f"Error: Failed to connect to GitHub API: {str(e)}")
+            raise RuntimeError(f"Error: Failed to connect to GitHub API: {e!s}") from e

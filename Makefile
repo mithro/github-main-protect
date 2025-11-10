@@ -1,4 +1,4 @@
-.PHONY: help install test run clean clean-exports lint format check
+.PHONY: help install test run clean clean-exports lint format check type-check security ci-local
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -48,5 +48,38 @@ format: ## Format code with ruff (requires ruff)
 	uv run ruff format github_branch_protection_checker/ tests/
 
 check: test lint ## Run tests and linting
+
+type-check: ## Run type checking with mypy
+	uv run mypy github_branch_protection_checker/ --ignore-missing-imports
+
+security: ## Run security checks (bandit, safety, gitleaks)
+	@echo "Running bandit security scan..."
+	uv run bandit -r github_branch_protection_checker/ -f screen || true
+	@echo ""
+	@echo "Running safety check..."
+	uv pip freeze | uv run safety check --stdin || true
+	@echo ""
+	@echo "Running gitleaks (if installed)..."
+	@command -v gitleaks >/dev/null 2>&1 && gitleaks detect --source . --verbose || echo "gitleaks not installed, skipping"
+
+ci-local: ## Run all CI checks locally
+	@echo "=== Running CI Checks Locally ==="
+	@echo ""
+	@echo "1. Linting..."
+	@$(MAKE) lint
+	@echo ""
+	@echo "2. Format check..."
+	uv run ruff format --check github_branch_protection_checker/ tests/
+	@echo ""
+	@echo "3. Type checking..."
+	@$(MAKE) type-check || true
+	@echo ""
+	@echo "4. Fast tests..."
+	@$(MAKE) test
+	@echo ""
+	@echo "5. Security checks..."
+	@$(MAKE) security
+	@echo ""
+	@echo "=== All CI Checks Complete ==="
 
 all: install test ## Install dependencies and run tests

@@ -1,15 +1,11 @@
 """Main entry point for GitHub branch protection checker"""
+
 import sys
-from typing import Optional
+
 from .auth import get_github_token
-from .graphql_client import GraphQLClient
 from .fetcher import RepositoryFetcher
-from .formatters import (
-    format_console_output,
-    export_to_json,
-    export_to_csv,
-    export_to_markdown
-)
+from .formatters import export_to_csv, export_to_json, export_to_markdown, format_console_output
+from .graphql_client import GraphQLClient
 
 
 def main(output_dir: str = ".") -> int:
@@ -57,18 +53,18 @@ def main(output_dir: str = ".") -> int:
             unprotected_repos=unprotected,
             total_repos=len(all_repos),
             archived_count=archived_count,
-            no_branch_count=no_branch_count
+            no_branch_count=no_branch_count,
         )
         print(console_output)
 
         # Export to files
-        if unprotected or True:  # Always create exports
+        if True:  # Always create exports
             json_file = export_to_json(
                 unprotected_repos=unprotected,
                 total_repos=len(all_repos),
                 archived_count=archived_count,
                 no_branch_count=no_branch_count,
-                output_dir=output_dir
+                output_dir=output_dir,
             )
             print(f"\nExported to JSON: {json_file}")
 
@@ -80,7 +76,7 @@ def main(output_dir: str = ".") -> int:
                 total_repos=len(all_repos),
                 archived_count=archived_count,
                 no_branch_count=no_branch_count,
-                output_dir=output_dir
+                output_dir=output_dir,
             )
             print(f"Exported to Markdown: {md_file}")
 
@@ -90,9 +86,9 @@ def main(output_dir: str = ".") -> int:
         print(str(e), file=sys.stderr)
         return 1
     except Exception as e:
-        print(f"Error: Unexpected error occurred: {str(e)}", file=sys.stderr)
+        print(f"Error: Unexpected error occurred: {e!s}", file=sys.stderr)
         return 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

@@ -1,8 +1,9 @@
 """Repository fetcher with pagination support"""
+
 from typing import List, Optional
+
 from .graphql_client import GraphQLClient
 from .models import Repository
-
 
 REPO_QUERY = """
 query($cursor: String) {
@@ -66,17 +67,17 @@ class RepositoryFetcher:
         has_next_page = True
 
         while has_next_page:
-            variables = {'cursor': cursor}
+            variables = {"cursor": cursor}
             data = self.client.execute(REPO_QUERY, variables=variables)
 
-            repo_data = data['viewer']['repositories']
-            page_info = repo_data['pageInfo']
+            repo_data = data["viewer"]["repositories"]
+            page_info = repo_data["pageInfo"]
 
-            for node in repo_data['nodes']:
+            for node in repo_data["nodes"]:
                 repo = Repository.from_graphql(node)
                 repositories.append(repo)
 
-            has_next_page = page_info['hasNextPage']
-            cursor = page_info['endCursor']
+            has_next_page = page_info["hasNextPage"]
+            cursor = page_info["endCursor"]
 
         return repositories

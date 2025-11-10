@@ -1,0 +1,15 @@
+# Bandit security linter configuration
+# https://bandit.readthedocs.io/
+
+[bandit]
+# Exclude test directories from certain checks
+exclude_dirs = ['/tests']
+
+# Tests to skip (if needed)
+skips = []
+
+# Severity level: LOW, MEDIUM, HIGH
+severity = MEDIUM
+
+# Confidence level: LOW, MEDIUM, HIGH
+confidence = MEDIUM

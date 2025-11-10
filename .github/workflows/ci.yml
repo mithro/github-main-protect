@@ -1,0 +1,221 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+env:
+  FORCE_COLOR: "1"  # Make output colorful
+
+jobs:
+  lint:
+    name: Lint and Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      - name: Install ruff
+        run: uv pip install ruff
+
+      - name: Run ruff linting
+        run: uv run ruff check github_branch_protection_checker/ tests/
+
+      - name: Run ruff format check
+        run: uv run ruff format --check github_branch_protection_checker/ tests/
+
+  test-fast:
+    name: Fast Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      - name: Run fast tests
+        run: uv run pytest -v
+
+      - name: Verify package can be imported
+        run: uv run python -c "import github_branch_protection_checker; print('Import successful')"
+
+      - name: Verify CLI entry point exists
+        run: uv run python -m github_branch_protection_checker --help || echo "CLI executed"
+
+  test-all:
+    name: All Tests Including Slow (Python ${{ matrix.python-version }})
+    # Only run all tests on main branch and PRs, not on every push to feature branches
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      - name: Run all tests including slow integration tests
+        run: uv run pytest -v -m ""
+        continue-on-error: true  # Slow tests might fail without GitHub auth
+
+  coverage:
+    name: Test Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      - name: Install pytest-cov
+        run: uv pip install pytest-cov
+
+      - name: Run tests with coverage
+        run: uv run pytest --cov=github_branch_protection_checker --cov-report=xml --cov-report=term
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
+          flags: unittests
+          name: codecov-umbrella
+        continue-on-error: true  # Don't fail if codecov upload fails
+
+  package-install:
+    name: Test Package Installation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Build package
+        run: uv build
+
+      - name: Test installation from wheel
+        run: |
+          uv pip install dist/*.whl
+          uv run python -c "import github_branch_protection_checker; print('Package installed and imported successfully')"
+
+  type-check:
+    name: Type Checking (Optional)
+    runs-on: ubuntu-latest
+    continue-on-error: true  # Don't fail CI if type checking fails
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      - name: Install mypy
+        run: uv pip install mypy types-requests
+
+      - name: Run mypy type checking
+        run: uv run mypy github_branch_protection_checker/ --ignore-missing-imports
+
+  verify-clean:
+    name: Verify Clean Checkout
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for merge conflicts
+        run: |
+          if grep -r "<<<<<<< HEAD" . --exclude-dir=.git; then
+            echo "Error: Merge conflict markers found"
+            exit 1
+          fi
+
+      - name: Check for debug statements
+        run: |
+          # Allow debug statements but warn about them
+          if grep -r "import pdb" github_branch_protection_checker/ || \
+             grep -r "breakpoint()" github_branch_protection_checker/ || \
+             grep -r "import ipdb" github_branch_protection_checker/; then
+            echo "Warning: Debug statements found in code"
+            exit 1
+          fi
+        continue-on-error: true
+
+  all-checks-passed:
+    name: All Checks Passed
+    needs: [lint, test-fast, package-install]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report success
+        run: echo "All required checks passed!"

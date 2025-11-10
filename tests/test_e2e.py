@@ -1,7 +1,8 @@
 """End-to-end integration test"""
+
 import subprocess
+
 import pytest
-from pathlib import Path
 
 
 @pytest.mark.slow
@@ -19,11 +20,11 @@ def test_script_execution_e2e(tmp_path):
     Skip with: pytest -v -m "not slow"
     """
     result = subprocess.run(
-        ['uv', 'run', 'python', '-m', 'github_branch_protection_checker'],
+        ["uv", "run", "python", "-m", "github_branch_protection_checker"],
         capture_output=True,
         text=True,
         timeout=60,
-        cwd=str(tmp_path)  # Run in temp dir to avoid polluting working directory
+        cwd=str(tmp_path),  # Run in temp dir to avoid polluting working directory
     )
 
     # Should fail with auth error or succeed
@@ -44,11 +45,10 @@ def test_script_execution_e2e(tmp_path):
 def test_script_can_be_imported():
     """Fast test that the script module can be imported without errors"""
     result = subprocess.run(
-        ['uv', 'run', 'python', '-c',
-         'import github_branch_protection_checker; print("OK")'],
+        ["uv", "run", "python", "-c", 'import github_branch_protection_checker; print("OK")'],
         capture_output=True,
         text=True,
-        timeout=10
+        timeout=10,
     )
 
     assert result.returncode == 0

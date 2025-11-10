@@ -136,7 +136,6 @@ With `fail-fast: false`, all versions are tested even if one fails.
 | Job | Purpose | When It Runs |
 |-----|---------|--------------|
 | `gitleaks` | Secret scanning | Always + Weekly |
-| `dependency-review` | Dependency vulnerability check | PRs only |
 | `safety-check` | Python package vulnerabilities | Always |
 | `bandit` | Security linting | Always |
 | `codeql` | Advanced code analysis | Always |
@@ -144,16 +143,11 @@ With `fail-fast: false`, all versions are tested even if one fails.
 #### Security Checks Explained
 
 **GitLeaks:**
-- Scans git history for secrets
+- On PRs: Scans current files for secrets
+- On push to master: Scans entire git history
 - Checks for API keys, tokens, passwords
 - Prevents credential leaks
-- Runs on full git history (`fetch-depth: 0`)
-
-**Dependency Review:**
-- Only runs on pull requests
-- Reviews changes to dependencies
-- Fails if moderate+ severity vulnerabilities added
-- Uses GitHub's vulnerability database
+- Downloads and runs gitleaks directly
 
 **Safety Check:**
 - Scans Python dependencies for CVEs
@@ -380,7 +374,7 @@ The type-check job is optional (`continue-on-error: true`), so it won't block CI
 
 ### Dependency Vulnerabilities
 
-**Problem**: Safety or dependency-review finds CVEs
+**Problem**: Safety finds CVEs in dependencies
 
 **Solution**:
 1. Update affected package: `uv lock --upgrade`

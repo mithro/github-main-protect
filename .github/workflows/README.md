@@ -68,26 +68,22 @@ Comprehensive security scanning for secrets, vulnerabilities, and code security 
 **Jobs:**
 
 1. **GitLeaks Secret Scanning**
-   - Scans entire git history for secrets
+   - On PRs: Scans current files for secrets
+   - On push to master: Scans entire git history
    - Checks for API keys, tokens, passwords
-   - Uses official gitleaks-action
+   - Downloads and runs gitleaks directly
 
-2. **Dependency Review** (PRs only)
-   - Reviews dependency changes in pull requests
-   - Fails on moderate or higher severity vulnerabilities
-   - Uses GitHub's dependency review action
-
-3. **Python Dependency Safety Check**
+2. **Python Dependency Safety Check**
    - Scans Python dependencies for known vulnerabilities
    - Uses safety database
    - Reports but doesn't fail CI
 
-4. **Bandit Security Linting**
+3. **Bandit Security Linting**
    - Static security analysis of Python code
    - Checks for common security issues
    - Uploads results as artifacts
 
-5. **CodeQL Security Analysis**
+4. **CodeQL Security Analysis**
    - Advanced security analysis by GitHub
    - Finds security vulnerabilities and coding errors
    - Uses extended security queries

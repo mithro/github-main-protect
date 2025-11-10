@@ -82,29 +82,25 @@ This document summarizes the GitHub Actions CI/CD pipeline created for the githu
 - Pull requests to `master` or `main` branches
 - Weekly schedule (Mondays at 9am UTC)
 
-### Jobs (5 total)
+### Jobs (4 total)
 
 1. **gitleaks** - Secret Scanning
-   - Scans entire git history for secrets
+   - On PRs: Scans current files for secrets
+   - On push to master: Scans entire git history
    - Checks for API keys, tokens, passwords
-   - Uses official gitleaks-action
+   - Downloads and runs gitleaks directly
 
-2. **dependency-review** - Dependency Vulnerability Check (PRs only)
-   - Reviews dependency changes in PRs
-   - Fails on moderate+ severity vulnerabilities
-   - Uses GitHub's dependency-review-action
-
-3. **safety-check** - Python Dependency Safety
+2. **safety-check** - Python Dependency Safety
    - Scans Python packages for CVEs
    - Uses safety database
    - Reports but doesn't fail CI
 
-4. **bandit** - Security Linting
+3. **bandit** - Security Linting
    - Static security analysis of Python code
    - Checks for common security issues
    - Uploads results as artifacts
 
-5. **codeql** - Advanced Code Analysis
+4. **codeql** - Advanced Code Analysis
    - GitHub's advanced security analysis
    - Finds vulnerabilities and coding errors
    - Uses extended security query pack

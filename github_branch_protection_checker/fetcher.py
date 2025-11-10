@@ -21,7 +21,7 @@ query($cursor: String) {
             id
           }
           refUpdateRule {
-            id
+            __typename
           }
           rules(first: 1) {
             totalCount
